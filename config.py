@@ -29,6 +29,24 @@ ERC20_ABI = [
         ],
         "outputs": [{"name": "", "type": "bool"}],
     },
+    {
+        "name": "decimals",
+        "type": "function",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "uint8"}],
+    },
+    {
+        "name": "name",
+        "type": "function",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "string"}],
+    },
+    {
+        "name": "symbol",
+        "type": "function",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "string"}],
+    }
 ]
 
 ERC20_TRANSFER_SIGNATURE = "0xa9059cbb"  # transfer(address,uint256)
