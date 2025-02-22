@@ -1,11 +1,7 @@
 from web3 import AsyncWeb3
 from web3.utils.subscriptions import PendingTxSubscription
-from blockwatcher.handlers.pending_tx_handler import pending_native_tx_handler
-from blockwatcher.handlers.erc20_pending_tx_handler import pending_erc20_tx_handler
-from blockwatcher.handlers.erc20_handler import erc20_handler
-from blockwatcher.database.db_manager import DatabaseManager
+from blockwatcher.handlers import pending_native_tx_handler, pending_erc20_tx_handler, erc20_handler
 from config import WSS_URL
-
 
 async def sub_manager(db_manager):
     """Sets up subscriptions for pending transactions."""

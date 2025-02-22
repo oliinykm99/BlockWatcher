@@ -1,6 +1,6 @@
 import asyncio
-from blockwatcher.subscriptions.pending_tx_subscription import sub_manager
-from blockwatcher.database.db_manager import DatabaseManager
+from blockwatcher.subscriptions import sub_manager
+from blockwatcher.database import DatabaseManager
 from config import DB_URL
 
 async def main():
