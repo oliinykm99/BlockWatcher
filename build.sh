@@ -22,7 +22,7 @@ then
     pip3 list
 else
     echo "Creating new Python virtual environment"
-    python3 -m venv ${DIRECTORY}
+    python3.11 -m venv ${DIRECTORY}
 
     echo "Activating virtual environment"
     source ${DIRECTORY}/bin/activate

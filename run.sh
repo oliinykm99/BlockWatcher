@@ -7,7 +7,7 @@ echo "Activating ${DIRECTORY}"
 source ${DIRECTORY}/bin/activate
 
 echo "Running main.py script"
-python main.py
+${DIRECTORY}/bin/python main.py
 
 echo "Deactivating ${DIRECTORY}"
 deactivate
