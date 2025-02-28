@@ -12,9 +12,9 @@ async def main():
     except KeyboardInterrupt:
         print("\n🛑 Stopped by user.")
     except asyncio.CancelledError:
-        print("\n⚠️ Task was cancelled.")
+        print("\n🛑 Task was cancelled.")
     except Exception as e:
-        print(f"⚠️ An error occurred: {e}")
+        print(f"🛑 An error occurred: {e}")
     finally:
         await db_manager.close()
     
