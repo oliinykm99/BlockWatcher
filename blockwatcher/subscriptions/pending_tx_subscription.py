@@ -1,14 +1,14 @@
-from web3 import AsyncWeb3
 from web3.utils.subscriptions import PendingTxSubscription
 from blockwatcher.handlers import pending_native_tx_handler, pending_erc20_tx_handler, erc20_handler
-from config import WSS_URL
+from blockwatcher.utils import ws_manager
 
 async def sub_manager(db_manager):
     """Sets up subscriptions for pending transactions."""
-    w3 = await AsyncWeb3(AsyncWeb3.WebSocketProvider(WSS_URL))
+    await ws_manager.connect()
 
-    if await w3.is_connected():
+    if await ws_manager.is_connected():
         print("✅ Connected to Ethereum WebSocket!")
+        w3 = ws_manager.w3
 
         pending_native_tx = PendingTxSubscription(
             label="pending-tx",
