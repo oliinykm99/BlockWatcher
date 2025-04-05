@@ -1,5 +1,5 @@
 from web3.utils.subscriptions import PendingTxSubscription
-from blockwatcher.handlers import pending_native_tx_handler, pending_erc20_tx_handler, erc20_handler
+from blockwatcher.handlers import pending_native_tx_handler, pending_erc20_tx_handler, erc20_handler, erc20_price_handler
 from blockwatcher.utils import ws_manager
 
 async def sub_manager(db_manager):
@@ -24,8 +24,13 @@ async def sub_manager(db_manager):
             label="erc20-tokens",
             full_transactions=True,
             handler=lambda ctx: erc20_handler(ctx, w3, db_manager))
+        
+        erc20_token_price = PendingTxSubscription(
+            label="erc20-tokens-price",
+            full_transactions=True,
+            handler=lambda ctx: erc20_price_handler(ctx, w3, db_manager))
 
-        await w3.subscription_manager.subscribe([pending_native_tx, pending_erc20_tx, erc20_token])
+        await w3.subscription_manager.subscribe([pending_native_tx, pending_erc20_tx, erc20_token, erc20_token_price])
         await w3.subscription_manager.handle_subscriptions()
     else:
         print("❌ Connection failed. Check WSS URL.")
