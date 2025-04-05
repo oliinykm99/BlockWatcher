@@ -39,6 +39,14 @@ class DatabaseManager:
                 symbol TEXT NOT NULL,
                 decimals INTEGER NOT NULL
             );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS token_prices (
+                token_address TEXT NOT NULL,
+                price_usd NUMERIC NOT NULL,
+                timestamp TIMESTAMPTZ DEFAULT NOW(),
+                PRIMARY KEY (token_address, timestamp)
+            );
             """
         ]
 
@@ -76,3 +84,17 @@ class DatabaseManager:
             await conn.execute(
                 query, token_address, name, symbol, decimals
             )
+
+    async def store_token_price(self, token_address, price_usd):
+        if not self.pool:
+            print("⚠️ Connection pool not initialized. Call connect() first.")
+            return
+
+        query = """
+        INSERT INTO token_prices (token_address, price_usd)
+        VALUES ($1, $2)
+        ON CONFLICT (token_address, timestamp) DO NOTHING;
+        """
+        async with self.pool.acquire() as conn:
+            await conn.execute(query, token_address, price_usd)
+        print(f"💰 Stored Price for {token_address[:8]}...: ${price_usd}")
