@@ -1,7 +1,7 @@
 import asyncio
 from web3.utils.subscriptions import PendingTxSubscription
 from blockwatcher.telegram import telegram_bot_handler
-from blockwatcher.telegram import telegram_native_alert_handler
+from blockwatcher.telegram import telegram_native_alert_handler, telegram_erc20_alert_handler
 from blockwatcher.utils import ws_manager
 
 async def sub_manager():
@@ -18,8 +18,14 @@ async def sub_manager():
             label="telegram-native-alert",
             full_transactions=True,
             handler=lambda ctx: telegram_native_alert_handler(ctx, telegram_bot_handler))
+        
+        telegram_erc20_alert = PendingTxSubscription(
+            label="telegram-erc20-alert",
+            full_transactions=True,
+            handler=lambda ctx: telegram_erc20_alert_handler(ctx, telegram_bot_handler)
+        )
 
-        await w3.subscription_manager.subscribe([telegram_native_alert])
+        await w3.subscription_manager.subscribe([telegram_native_alert, telegram_erc20_alert])
         await w3.subscription_manager.handle_subscriptions()
     else:
         print("❌ Connection failed. Check WSS URL.")
