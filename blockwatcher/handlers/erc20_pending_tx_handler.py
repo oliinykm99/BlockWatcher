@@ -1,7 +1,8 @@
 from web3.exceptions import ContractLogicError
 from config import ERC20_ABI, ERC20_TRANSFER_SIGNATURE, ERC20_TRANSFER_FROM_SIGNATURE 
 
-async def pending_erc20_tx_handler(handler_context, w3, db_manager):
+async def pending_erc20_tx_handler(handler_context, db_manager):
+    w3 = handler_context.async_w3
     tx_hash = '0x' + handler_context.result.hex()
     try:
         tx = await w3.eth.get_transaction(tx_hash)
