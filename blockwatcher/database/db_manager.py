@@ -98,3 +98,40 @@ class DatabaseManager:
         async with self.pool.acquire() as conn:
             await conn.execute(query, token_address, price_usd)
         print(f"💰 Stored Price for {token_address[:8]}...: ${price_usd}")
+
+    async def get_token_metadata(self, token_address):
+        if not self.pool:
+            print("⚠️ Connection pool not initialized. Call connect() first.")
+            return None
+
+        query = """
+        SELECT name, symbol, decimals
+        FROM tokens
+        WHERE token_address = $1;
+        """
+        async with self.pool.acquire() as conn:
+            result = await conn.fetchrow(query, token_address)
+            if result:
+                return token_address, result['name'], result['symbol'], result['decimals']
+            else:
+                return None
+            
+    async def get_token_price(self, token_address):
+        if not self.pool:
+            print("⚠️ Connection pool not initialized. Call connect() first.")
+            return None
+
+        query = """
+        SELECT price_usd, timestamp
+        FROM token_prices
+        WHERE token_address = $1
+        ORDER BY timestamp DESC
+        LIMIT 1;
+        """
+        async with self.pool.acquire() as conn:
+            result = await conn.fetchrow(query, token_address)
+        if result:
+            price_usd = result['price_usd']
+            timestamp = result['timestamp']
+            return price_usd, timestamp
+        return None

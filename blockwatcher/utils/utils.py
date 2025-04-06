@@ -1,13 +1,19 @@
 import requests
+import pytz
+from datetime import datetime, timedelta
 from config import ERC20_ABI, ANKR_API
 
-async def fetch_token_metadata(w3, token_address):
+async def fetch_token_metadata(w3, token_address, db_manager):
+    token_metadata = await db_manager.get_token_metadata(token_address)
+    if token_metadata:
+        return token_metadata
+    
     contract = w3.eth.contract(address=token_address, abi=ERC20_ABI)
     try:
         name = await contract.functions.name().call()
         symbol = await contract.functions.symbol().call()
         decimals = await contract.functions.decimals().call()
-
+        await db_manager.store_token_metadata(token_address, name, symbol, decimals)
         return token_address, name, symbol, decimals
     except Exception as e:
         print(f"⚠️ Error fetching metadata for {token_address}: {e}")
@@ -60,11 +66,18 @@ def fetch_token_price_ankr(token_address, network="eth", api_key=ANKR_API):
         print(f"⚠️ Error fetching price for {token_address}: {e}")
         return token_address, None
 
-def fetch_token_price(token_address):
-    token, price = fetch_token_price_cg(token_address)
+async def fetch_token_price(token_address, db_manager):
+    stored_price_data = await db_manager.get_token_price(token_address)
+    if stored_price_data:
+        stored_price, timestamp = stored_price_data
+        if datetime.now(pytz.utc) - timestamp < timedelta(minutes=10):
+            return token_address, float(stored_price)
+
+    token_address, price = fetch_token_price_cg(token_address)
     if price is None:
-        token, price = fetch_token_price_ankr(token_address)
+        token_address, price = fetch_token_price_ankr(token_address)
     if price is None:
         print(f"⚠️ Failed to fetch price for {token_address} from both APIs.")
     
-    return token, price  
+    await db_manager.store_token_price(token_address, price)
+    return token_address, price  
