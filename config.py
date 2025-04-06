@@ -7,7 +7,7 @@ WSS_URL = os.getenv('WSS_URL')
 DB_URL = os.getenv('DB_URL')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-
+ANKR_API = os.getenv('ANKR_API')
 
 # Constants
 # ERC20 ABI
