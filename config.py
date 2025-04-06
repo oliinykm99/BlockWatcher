@@ -13,25 +13,6 @@ ANKR_API = os.getenv('ANKR_API')
 # ERC20 ABI
 ERC20_ABI = [
     {
-        "name": "transfer",
-        "type": "function",
-        "inputs": [
-            {"name": "to", "type": "address"},
-            {"name": "value", "type": "uint256"}
-        ],
-        "outputs": [{"name": "", "type": "bool"}],
-    },
-    {
-        "name": "transferFrom",
-        "type": "function",
-        "inputs": [
-            {"name": "from", "type": "address"},
-            {"name": "to", "type": "address"},
-            {"name": "value", "type": "uint256"}
-        ],
-        "outputs": [{"name": "", "type": "bool"}],
-    },
-    {
         "name": "decimals",
         "type": "function",
         "inputs": [],
