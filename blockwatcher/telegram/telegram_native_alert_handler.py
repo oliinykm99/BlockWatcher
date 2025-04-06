@@ -6,7 +6,7 @@ async def telegram_native_alert_handler(handler_context, telegram_bot_handler, d
     tx_hash = '0x' + handler_context.result.hex()
     try:
         tx = await w3.eth.get_transaction(tx_hash)
-        if tx['value'] <= 10*(10**18) or tx['gas'] < 21_000:
+        if tx['value'] <= 50*(10**18) or tx['gas'] < 21_000:
             return        
 
         _, price_usd = await fetch_token_price(token_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", db_manager=db_manager)

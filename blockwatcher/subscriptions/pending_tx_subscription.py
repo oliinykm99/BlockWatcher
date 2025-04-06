@@ -4,29 +4,32 @@ from blockwatcher.telegram import telegram_bot_handler
 from blockwatcher.telegram import telegram_native_alert_handler, telegram_erc20_alert_handler
 from blockwatcher.utils import ws_manager
 
+async def run_subscription(label, handler, telegram_bot_handler, db_manager):
+    """Run a single subscription."""
+    w3 = ws_manager.w3
+    subscription = PendingTxSubscription(
+        label=label,
+        full_transactions=True,
+        handler=lambda ctx: handler(ctx, telegram_bot_handler, db_manager)
+    )
+    await w3.subscription_manager.subscribe([subscription])
+    await w3.subscription_manager.handle_subscriptions()
+
 async def sub_manager(db_manager):
     """Sets up subscriptions for pending transactions."""
     await ws_manager.connect()
 
     if await ws_manager.is_connected():
         print("✅ Connected to Ethereum WebSocket!")
-        w3 = ws_manager.w3
 
-        asyncio.create_task(monitor_subscription_queue(w3))
+        asyncio.create_task(monitor_subscription_queue(ws_manager.w3))
 
-        telegram_native_alert = PendingTxSubscription(
-            label="telegram-native-alert",
-            full_transactions=True,
-            handler=lambda ctx: telegram_native_alert_handler(ctx, telegram_bot_handler, db_manager))
-        
-        telegram_erc20_alert = PendingTxSubscription(
-            label="telegram-erc20-alert",
-            full_transactions=True,
-            handler=lambda ctx: telegram_erc20_alert_handler(ctx, telegram_bot_handler, db_manager)
-        )
+        tasks = [
+            asyncio.create_task(run_subscription("telegram-native-alert", telegram_native_alert_handler, telegram_bot_handler, db_manager)),
+            asyncio.create_task(run_subscription("telegram-erc20-alert", telegram_erc20_alert_handler, telegram_bot_handler, db_manager))
+        ]
 
-        await w3.subscription_manager.subscribe([telegram_native_alert])
-        await w3.subscription_manager.handle_subscriptions()
+        await asyncio.gather(*tasks)
     else:
         print("❌ Connection failed. Check WSS URL.")
 
