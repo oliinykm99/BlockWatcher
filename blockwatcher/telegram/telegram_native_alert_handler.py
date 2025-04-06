@@ -2,11 +2,11 @@ from web3.exceptions import ContractLogicError
 from blockwatcher.utils.utils import fetch_token_price
 
 async def telegram_native_alert_handler(handler_context, telegram_bot_handler):
-    async_w3 = handler_context.async_w3
+    w3 = handler_context.async_w3
     tx_hash = '0x' + handler_context.result.hex()
     try:
-        tx = await async_w3.eth.get_transaction(tx_hash)
-        if tx['value'] <= 5*(10**18) or tx['gas'] < 21_000:
+        tx = await w3.eth.get_transaction(tx_hash)
+        if tx['value'] <= 10*(10**18) or tx['gas'] < 21_000:
             return        
 
         _, price_usd = fetch_token_price(token_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
