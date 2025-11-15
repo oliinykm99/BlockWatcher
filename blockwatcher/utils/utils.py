@@ -1,7 +1,4 @@
-import requests
-import pytz
-from datetime import datetime, timedelta
-from config import ERC20_ABI, ANKR_API
+from config import ERC20_ABI, CHAINLINK_ETH_USD, CHAINLINK_ABI
 
 async def fetch_token_metadata(w3, token_address, db_manager):
     token_metadata = await db_manager.get_token_metadata(token_address)
@@ -18,66 +15,3 @@ async def fetch_token_metadata(w3, token_address, db_manager):
     except Exception as e:
         print(f"⚠️ Error fetching metadata for {token_address}: {e}")
         return None
-    
-def fetch_token_price_cg(token_address, network="ethereum"):
-    url = f"https://api.coingecko.com/api/v3/simple/token_price/{network}"
-    params = {
-        "contract_addresses": token_address,
-        "vs_currencies": "usd"
-    }
-    try:
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            usd_price = data.get(token_address.lower(), {}).get("usd")
-            if usd_price is not None:
-                return token_address, usd_price
-        print(f"⚠️ Token not found or no USD price: {token_address}")
-        return token_address, None
-    except Exception as e:
-        print(f"⚠️ Error fetching price for {token_address}: {e}")
-        return token_address, None
-
-def fetch_token_price_ankr(token_address, network="eth", api_key=ANKR_API):
-    url = f"https://rpc.ankr.com/multichain/{api_key}"
-    headers = {
-        "Content-Type": "application/json"
-    }
-    data = {
-        "jsonrpc": "2.0",
-        "method": "ankr_getTokenPrice",
-        "params": {
-            "blockchain": network,  
-            "contractAddress": token_address
-        },
-        "id": 1
-    }
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 200:
-            result = response.json()
-            if 'result' in result:
-                price_usd = result['result'].get('usdPrice')
-                if price_usd is not None:
-                    return token_address, float(price_usd)
-        print(f"⚠️ Token not found or no USD price: {token_address}")
-        return token_address, None
-    except Exception as e:
-        print(f"⚠️ Error fetching price for {token_address}: {e}")
-        return token_address, None
-
-async def fetch_token_price(token_address, db_manager):
-    stored_price_data = await db_manager.get_token_price(token_address)
-    if stored_price_data:
-        stored_price, timestamp = stored_price_data
-        if datetime.now(pytz.utc) - timestamp < timedelta(minutes=10):
-            return token_address, float(stored_price)
-
-    token_address, price = fetch_token_price_cg(token_address)
-    if price is None:
-        token_address, price = fetch_token_price_ankr(token_address)
-    if price is None:
-        print(f"⚠️ Failed to fetch price for {token_address} from both APIs.")
-    
-    await db_manager.store_token_price(token_address, price)
-    return token_address, price  
