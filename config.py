@@ -7,30 +7,11 @@ WSS_URL = os.getenv('WSS_URL')
 DB_URL = os.getenv('DB_URL')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
-
+ANKR_API = os.getenv('ANKR_API')
 
 # Constants
 # ERC20 ABI
 ERC20_ABI = [
-    {
-        "name": "transfer",
-        "type": "function",
-        "inputs": [
-            {"name": "to", "type": "address"},
-            {"name": "value", "type": "uint256"}
-        ],
-        "outputs": [{"name": "", "type": "bool"}],
-    },
-    {
-        "name": "transferFrom",
-        "type": "function",
-        "inputs": [
-            {"name": "from", "type": "address"},
-            {"name": "to", "type": "address"},
-            {"name": "value", "type": "uint256"}
-        ],
-        "outputs": [{"name": "", "type": "bool"}],
-    },
     {
         "name": "decimals",
         "type": "function",
