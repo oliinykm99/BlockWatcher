@@ -1,32 +1,24 @@
 import asyncio
 from web3.utils.subscriptions import PendingTxSubscription
-from blockwatcher.telegram import telegram_bot_handler
-from blockwatcher.telegram import telegram_native_alert_handler, telegram_erc20_alert_handler
-from blockwatcher.utils import ws_manager
+from blockwatcher.handlers.native import kafka_pending_native_tx_handler
 
-async def run_subscription(label, handler, telegram_bot_handler, db_manager):
+async def run_subscription(label, handler, ws_manager, kafka_producer=None, rpc_manager=None):
     """Run a single subscription."""
     w3 = ws_manager.w3
     subscription = PendingTxSubscription(
         label=label,
         full_transactions=True,
-        handler=lambda ctx: handler(ctx, telegram_bot_handler, db_manager)
+        handler=lambda ctx: handler(ctx, kafka_producer, rpc_manager)
     )
     await w3.subscription_manager.subscribe([subscription])
     await w3.subscription_manager.handle_subscriptions()
 
-async def sub_manager(db_manager):
+async def sub_manager(kafka_producer, ws_manager, rpc_manager):
     """Sets up subscriptions for pending transactions."""
-    await ws_manager.connect()
-
     if await ws_manager.is_connected():
-        print("✅ Connected to Ethereum WebSocket!")
-
-        asyncio.create_task(monitor_subscription_queue(ws_manager.w3))
-
         tasks = [
-            asyncio.create_task(run_subscription("telegram-native-alert", telegram_native_alert_handler, telegram_bot_handler, db_manager)),
-            asyncio.create_task(run_subscription("telegram-erc20-alert", telegram_erc20_alert_handler, telegram_bot_handler, db_manager))
+            asyncio.create_task(run_subscription("kafka-pending-tx", kafka_pending_native_tx_handler, ws_manager, kafka_producer, rpc_manager)),
+            asyncio.create_task(monitor_subscription_queue(ws_manager.w3))
         ]
 
         await asyncio.gather(*tasks)
