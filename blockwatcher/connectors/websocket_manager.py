@@ -1,6 +1,9 @@
 import asyncio
+import logging
 from web3 import AsyncWeb3
 from config import WSS_URL
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class WebSocketManager:
     def __init__(self, ws_url, max_retries):
@@ -11,15 +14,15 @@ class WebSocketManager:
     async def connect(self):
         for attempt in range(1, self.max_retries+1):
             try: 
-                print(f"🔄 Attempting WebSocket connection (Attempt {attempt}/{self.max_retries})...")
+                logging.info(f"🔄 Attempting WebSocket connection (Attempt {attempt}/{self.max_retries})...")
                 self.w3 = await AsyncWeb3(AsyncWeb3.WebSocketProvider(self.ws_url))
                 if await self.w3.is_connected():
-                    print("✅ WebSocket connected successfully!")
+                    logging.info("✅ WebSocket connected successfully!")
                     return
             except Exception as e:
-                print(f"🛑 WebSocket connection failed: {e}")
+                logging.error(f"🛑 WebSocket connection failed: {e}")
             await asyncio.sleep(2 ** attempt)
-        print("❌ WebSocket connection failed after max retries.")
+        logging.critical("❌ WebSocket connection failed after max retries.")
 
     async def is_connected(self):
         return self.w3 and await self.w3.is_connected()

@@ -1,6 +1,9 @@
 import json
+import logging
 from config import KAFKA_PENDING_TRANSACTIONS_TOPIC
 from web3.exceptions import ContractLogicError
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def kafka_pending_native_tx_handler(handler_context, kafka_producer, rpc_manager):
     #w3 = handler_context.async_w3
@@ -28,20 +31,16 @@ async def kafka_pending_native_tx_handler(handler_context, kafka_producer, rpc_m
             
             key = tx_hash
 
-            headers = [
-                ('type', b'pending_native_transfer'),
-                ('source', b'publicNode')
-            ]
+            headers = [('type', b'pending_native_transfer'),
+                       ('source', b'publicNode')]
 
-            await kafka_producer.send(
-                topic=KAFKA_PENDING_TRANSACTIONS_TOPIC,
-                value=value.encode('utf-8'),
-                key=key.encode('utf-8'),
-                headers=headers
-            )
+            await kafka_producer.send(topic=KAFKA_PENDING_TRANSACTIONS_TOPIC,
+                                      value=value.encode('utf-8'),
+                                      key=key.encode('utf-8'),
+                                      headers=headers)
             print('-'*75)
             print('\n')
     except ContractLogicError as e:
-        print(f"⚠️ Contract error for transaction {tx_hash}: {e}")
+        logging.critical(f"⚠️ Contract error for transaction {tx_hash}: {e}")
     except Exception as e:
-        print(f"⚠️ Error fetching transaction {tx_hash}: {e}")
+        logging.error(f"⚠️ Error fetching transaction {tx_hash}: {e}")
