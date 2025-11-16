@@ -13,6 +13,7 @@ CHAT_ID = os.getenv('CHAT_ID')
 # Kafka
 KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
 KAFKA_PENDING_TRANSACTIONS_TOPIC = 'raw-pending-transactions'
+KAFKA_PENDING_TRANSACTIONS_ERC20_TOPIC = 'raw-erc20-pending-transactions'
 KAFKA_ETH_PRICE_TOPIC = 'eth-price'
 
 # Chainlink Oracle
