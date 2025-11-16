@@ -1,10 +1,12 @@
 import asyncio
+import logging
 from blockwatcher.subscriptions import sub_manager
 #from blockwatcher.telegram import telegram_bot_handler
-from blockwatcher.kafka.kafka_producer import KafkaProducer
-from blockwatcher.utils.websocket_manager import ws_manager
-from blockwatcher.utils.http_manager import rpc_manager
-from config import DB_URL
+from blockwatcher.connectors.kafka_producer import KafkaProducer
+from blockwatcher.connectors.websocket_manager import ws_manager
+from blockwatcher.connectors.http_manager import rpc_manager
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def main():
     #await telegram_bot_handler.start()()
@@ -14,11 +16,11 @@ async def main():
     try:
         await sub_manager(kafka_producer, ws_manager, rpc_manager)
     except KeyboardInterrupt:
-        print("\n🛑 Stopped by user.")
+        logging.info("\n🛑 Stopped by user.")
     except asyncio.CancelledError:
-        print("\n🛑 Task was cancelled.")
+        logging.info("\n🛑 Task was cancelled.")
     except Exception as e:
-        print(f"🛑 An error occurred: {e}")
+        logging.info(f"🛑 An error occurred: {e}")
     finally:
         await kafka_producer.close()
 
